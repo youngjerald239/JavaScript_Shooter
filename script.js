@@ -19,7 +19,6 @@ class Raven {
     }
     update() {
         this.x -= this.directionX
-    
     }
     draw() {
         ctx.fillRect(this.x, this.y, this.width, this.height)
@@ -34,8 +33,10 @@ function animate(timestamp) {
     if (timeToNextRaven > ravenInterval) {
         ravens.push(new Raven())
         timeToNextRaven = 0
-        console.log(ravens)
+        
     }
+    [...ravens].forEach(object => object.update());
+    [...ravens].forEach(object => object.draw())
     requestAnimationFrame(animate)
 }
 animate(0)
