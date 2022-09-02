@@ -37,6 +37,7 @@ class Raven {
         this.flapInterval = Math.random() * 50 + 50
         this.randomColors = [Math.floor(Math.random() * 255), Math.floor(Math.random() * 255), Math.floor(Math.random() * 255)]
         this.color = 'rgb(' + this.randomColors[0] + ',' + this.randomColors[1] + ',' + this.randomColors[2] + ')'
+        this.hasTrail = Math.random() > 0.5
     }
 
     update(deltatime){
@@ -51,7 +52,10 @@ class Raven {
             if (this.frame > this.maxFrame) this.frame = 0
             else this.frame++
             this.timeSinceFlap = 0
-            particles.push(new Particle(this.x, this.y, this.width, this.color))
+            if(this.hasTrail){
+                particles.push(new Particle(this.x, this.y, this.width, this.color))
+            }
+
         }
         if (this.x < 0 - this.width) gameOver = true
     }
@@ -95,9 +99,9 @@ class Explosion {
 let particles = []
 class Particle {
     constructor(x, y, size, color) {
-        this.x = x
-        this.y = y
         this.size = size
+        this.x = x + this.size/2
+        this.y = y + this.size/3
         this.radius = Math.random() * this.size/10
         this.maxRadius = Math.random() * 20 + 35
         this.markedForDeletion = false
@@ -106,11 +110,12 @@ class Particle {
     }
     update(){
         this.x += this.speedX
-        this.radius += 0.2
+        this.radius += 0.5
         if (this.radius > this.maxRadius) this.markedForDeletion = true
 
     }
     draw(){
+        ctx.globalAlpha = 1
         ctx.beginPath()
         ctx.fillStyle = this.color
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
@@ -162,8 +167,8 @@ function animate(timestamp) {
         })
     }
     drawScore();
-    [...ravens, ...explosions, ...particles].forEach(object => object.update(deltatime));
-    [...ravens, ...explosions, ...particles].forEach(object => object.draw());
+    [...particles, ...ravens, ...explosions].forEach(object => object.update(deltatime));
+    [...particles, ...ravens, ...explosions].forEach(object => object.draw());
     ravens = ravens.filter(object => !object.markedForDeletion)
     explosions = explosions.filter(object => !object.markedForDeletion)
     particles = particles.filter(object => !object.markedForDeletion)
