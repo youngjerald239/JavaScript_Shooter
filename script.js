@@ -67,8 +67,15 @@ function drawScore(){
 }
 
 window.addEventListener('click', function(e){
-    const detectPixelColor = ctx.getImageData(e.x, e.y, 1, 1)
+    const detectPixelColor = collisionCtx.getImageData(e.x, e.y, 1, 1)
     console.log(detectPixelColor)
+    const pc = detectPixelColor.data
+    ravens.forEach(object  => {
+        if (object.randomColors[0] === pc[0] && object.randomColors[1] === pc[1] && object.randomColors[2] === pc[2]) {
+            object.markedForDeletion = true
+            score++
+        }
+    })
 })
 
 function animate(timestamp) {
