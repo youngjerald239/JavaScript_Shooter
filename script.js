@@ -2,6 +2,12 @@ const canvas = document.getElementById('canvas1')
 const ctx = canvas.getContext('2d')
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight 
+
+const collisionCanvas = document.getElementById('collisionCanvas')
+const collisionCtx = canvas.getContext('2d')
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
 let score = 0
 ctx.font = '50px Impact'
 
@@ -51,10 +57,16 @@ class Raven {
 }
 
 function drawScore(){
+    ctx.fillStyle = 'black'
+    ctx.fillText('Score:' + score, 50, 75)
     ctx.fillStyle = 'white'
-    ctx.fillText('Score:' + score, 50, 75)
-    ctx.fillText('Score:' + score, 50, 75)
+    ctx.fillText('Score:' + score, 55, 80)
 }
+
+window.addEventListener('click', function(e){
+    const detectPixelColor = ctx.getImageData(e.x, e.y, 1, 1)
+    console.log(detectPixelColor)
+})
 
 function animate(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
