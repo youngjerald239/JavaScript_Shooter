@@ -8,6 +8,7 @@ const collisionCtx = collisionCanvas.getContext('2d')
 collisionCanvas.width = window.innerWidth
 collisionCanvas.height = window.innerHeight
 
+let gameOver = false
 let score = 0
 ctx.font = '50px Impact'
 
@@ -50,7 +51,9 @@ class Raven {
             if (this.frame > this.maxFrame) this.frame = 0
             else this.frame++
             this.timeSinceFlap = 0
+            particles.push(new Particle(this.x, this.y, this.width, this.color))
         }
+        if (this.x < 0 - this.width) gameOver = true
     }
     draw() {
         collisionCtx.fillStyle = this.color 
@@ -80,11 +83,38 @@ class Explosion {
         this.timeSinceLastFrame += deltatime
         if (this.timeSinceLastFrame > this.frameInterval) {
             this.frame++
+            this.timeSinceLastFrame = 0
             if (this.frame > 5) this.markedForDeletion = true  
         }
     }
     draw() {
-        ctx.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.size, this.size)
+        ctx.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y - this.size/4, this.size, this.size)
+    }
+}
+
+let particles = []
+class Particle {
+    constructor(x, y, size, color) {
+        this.x = x
+        this.y = y
+        this.size = size
+        this.radius = Math.random() * this.size/10
+        this.maxRadius = Math.random() * 20 + 35
+        this.markedForDeletion = false
+        this.speedX = Math.random() * 1 + 0.5
+        this.color = color
+    }
+    update(){
+        this.x += this.speedX
+        this.radius += 0.2
+        if (this.radius > this.maxRadius) this.markedForDeletion = true
+
+    }
+    draw(){
+        ctx.beginPath()
+        ctx.fillStyle = this.color
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+        ctx.fill()
     }
 }
 
@@ -93,6 +123,14 @@ function drawScore(){
     ctx.fillText('Score:' + score, 50, 75)
     ctx.fillStyle = 'white'
     ctx.fillText('Score:' + score, 55, 80)
+}
+
+function drawGameOver(){
+    ctx.textAllign = 'center'
+    ctx.fillStyle = 'black'
+    ctx.fillText('Game Over, your score is ' + score, canvas.width/2, canvas.height/2)
+    ctx.fillStyle = 'white'
+    ctx.fillText('Game Over, your score is ' + score, canvas.width/2 + 5, canvas.height/2 + 5)
 }
 
 window.addEventListener('click', function(e){
@@ -124,11 +162,12 @@ function animate(timestamp) {
         })
     }
     drawScore();
-    [...ravens, ...explosions].forEach(object => object.update(deltatime));
-    [...ravens, ...explosions].forEach(object => object.draw());
+    [...ravens, ...explosions, ...particles].forEach(object => object.update(deltatime));
+    [...ravens, ...explosions, ...particles].forEach(object => object.draw());
     ravens = ravens.filter(object => !object.markedForDeletion)
     explosions = explosions.filter(object => !object.markedForDeletion)
-    
-    requestAnimationFrame(animate)
+    particles = particles.filter(object => !object.markedForDeletion)
+    if (!gameOver) requestAnimationFrame(animate)
+    else drawGameOver()
 }
 animate(0)
